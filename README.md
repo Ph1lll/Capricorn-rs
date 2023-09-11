@@ -1,5 +1,15 @@
 # Capricorn ♑︎︎
 
+## TODO
++ Drivetrain
++ Wings
++ Recording
++ Playback
++ Catapult
+
+## Controls
+TBD
+
 ## Notes for myself
 ### `cargo check`
 
