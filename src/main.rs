@@ -3,11 +3,14 @@
 use core::time::Duration;
 use vex_rt::{prelude::*, select};
 
+mod catapult;
 mod drivetrain;
 mod utils;
+mod wings;
 
 struct Capricorn {
     drive: Mutex<drivetrain::Drivetrain>,
+    wings: Mutex<wings::Wings>,
     controller: Controller,
 }
 
@@ -22,6 +25,7 @@ impl Robot for Capricorn {
                 peripherals.port05,
                 peripherals.port06,
             )),
+            wings: Mutex::new(wings::Wings::new(peripherals.port_a, peripherals.port_b)),
             controller: peripherals.master_controller,
         }
     }
@@ -43,8 +47,20 @@ impl Robot for Capricorn {
             let power: i32 = self.controller.left_stick.get_y().unwrap().into();
             let rotate: i32 = self.controller.right_stick.get_x().unwrap().into();
 
+            // Wings
+            self.wings
+                .lock()
+                .left_wing
+                .write(self.controller.l2.is_pressed().unwrap())
+                .unwrap();
+            self.wings
+                .lock()
+                .right_wing
+                .write(self.controller.r2.is_pressed().unwrap())
+                .unwrap();
+
             // Update the motors.
-            self.drive.lock().move_volt(
+            self.drive.lock().run(
                 utils::clamp_to_i8(power + rotate),
                 utils::clamp_to_i8(power - rotate),
             );
