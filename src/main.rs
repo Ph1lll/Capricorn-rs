@@ -5,12 +5,12 @@ use vex_rt::{prelude::*, select};
 
 mod catapult;
 mod drivetrain;
-mod utils;
 mod wings;
 
 struct Capricorn {
     drive: Mutex<drivetrain::Drivetrain>,
     wings: Mutex<wings::Wings>,
+    catapult: catapult::Catapult,
     controller: Controller,
 }
 
@@ -26,12 +26,13 @@ impl Robot for Capricorn {
                 peripherals.port06,
             )),
             wings: Mutex::new(wings::Wings::new(peripherals.port_a, peripherals.port_b)),
+            catapult: catapult::Catapult::new(peripherals.port13, peripherals.port14),
             controller: peripherals.master_controller,
         }
     }
 
     fn initialize(self: &mut Capricorn, _ctx: Context) {
-        // Do any extra initialization here.
+        self.catapult.set_brake_mode();
     }
 
     fn autonomous(self: &mut Capricorn, _ctx: Context) {
@@ -44,8 +45,11 @@ impl Robot for Capricorn {
 
         let mut l = Loop::new(Duration::from_millis(20));
         loop {
-            let power: i32 = self.controller.left_stick.get_y().unwrap().into();
-            let rotate: i32 = self.controller.right_stick.get_x().unwrap().into();
+            // Drivetrain
+            self.drive.lock().run(
+                self.controller.left_stick.get_y().unwrap(),
+                self.controller.right_stick.get_x().unwrap(),
+            );
 
             // Wings
             self.wings
@@ -59,11 +63,12 @@ impl Robot for Capricorn {
                 .write(self.controller.r2.is_pressed().unwrap())
                 .unwrap();
 
-            // Update the motors.
-            self.drive.lock().run(
-                utils::clamp_to_i8(power + rotate),
-                utils::clamp_to_i8(power - rotate),
-            );
+            // Catapult
+            if self.catapult.is_at_start() && self.catapult.has_triball() {
+                self.catapult.fire();
+            } else if self.catapult.is_at_end() {
+                self.catapult.go_back();
+            }
 
             select! {
                 // If the driver control period is done, break out of the loop.

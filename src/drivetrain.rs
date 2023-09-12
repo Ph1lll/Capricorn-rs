@@ -2,10 +2,6 @@ use vex_rt::prelude::*;
 
 const VOLT_CONST: f32 = 12000.0 / 127.0;
 
-fn to_volts(value: i8) -> i32 {
-    (value as f32 * VOLT_CONST) as i32
-}
-
 pub struct Drivetrain {
     pub left_front: Motor,
     pub left_middle: Motor,
@@ -49,15 +45,18 @@ impl Drivetrain {
         }
     }
 
-    pub fn run(&mut self, left: i8, right: i8) {
+    pub fn run(&mut self, power: i8, rotate: i8) {
+        let left = ((power as f32 + rotate as f32).clamp(-127.0, 127.0) * VOLT_CONST) as i32;
+        let right = ((power as f32 - rotate as f32).clamp(-127.0, 127.0) * VOLT_CONST) as i32;
+
         // Move left side
-        self.left_front.move_voltage(to_volts(left)).unwrap();
-        self.left_middle.move_voltage(to_volts(left)).unwrap();
-        self.left_back.move_voltage(to_volts(left)).unwrap();
+        self.left_front.move_voltage(left).unwrap();
+        self.left_middle.move_voltage(left).unwrap();
+        self.left_back.move_voltage(left).unwrap();
 
         // Move right side
-        self.right_front.move_voltage(to_volts(right)).unwrap();
-        self.right_middle.move_voltage(to_volts(right)).unwrap();
-        self.right_back.move_voltage(to_volts(right)).unwrap();
+        self.right_front.move_voltage(right).unwrap();
+        self.right_middle.move_voltage(right).unwrap();
+        self.right_back.move_voltage(right).unwrap();
     }
 }
