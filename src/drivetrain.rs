@@ -3,12 +3,12 @@ use vex_rt::prelude::*;
 const VOLT_CONST: f32 = 12000.0 / 127.0;
 
 pub struct Drivetrain {
-    pub left_front: Motor,
-    pub left_middle: Motor,
-    pub left_back: Motor,
-    pub right_front: Motor,
-    pub right_middle: Motor,
-    pub right_back: Motor,
+    left_front: Motor,
+    left_middle: Motor,
+    left_back: Motor,
+    right_front: Motor,
+    right_middle: Motor,
+    right_back: Motor,
 }
 
 impl Drivetrain {
@@ -23,25 +23,24 @@ impl Drivetrain {
         Self {
             // Left side motors
             left_front: left_front_port
-                .into_motor(Gearset::EighteenToOne, EncoderUnits::Degrees, false)
-                .unwrap(),
+                .into_motor(Gearset::SixToOne, EncoderUnits::Degrees, true)
+                .expect("LFM not initialized"),
             left_middle: left_middle_port
-                .into_motor(Gearset::EighteenToOne, EncoderUnits::Degrees, true)
-                .unwrap(),
+                .into_motor(Gearset::SixToOne, EncoderUnits::Degrees, true)
+                .expect("LMM not initialized"),
             left_back: left_back_port
-                .into_motor(Gearset::EighteenToOne, EncoderUnits::Degrees, false)
-                .unwrap(),
-
+                .into_motor(Gearset::SixToOne, EncoderUnits::Degrees, true)
+                .expect("LBM not initialized"),
             // Right side motors
             right_front: right_front_port
-                .into_motor(Gearset::EighteenToOne, EncoderUnits::Degrees, true)
-                .unwrap(),
+                .into_motor(Gearset::SixToOne, EncoderUnits::Degrees, false)
+                .expect("RFM not initialized"),
             right_middle: right_middle_port
-                .into_motor(Gearset::EighteenToOne, EncoderUnits::Degrees, false)
-                .unwrap(),
+                .into_motor(Gearset::SixToOne, EncoderUnits::Degrees, false)
+                .expect("RMM not initialized"),
             right_back: right_back_port
-                .into_motor(Gearset::EighteenToOne, EncoderUnits::Degrees, true)
-                .unwrap(),
+                .into_motor(Gearset::SixToOne, EncoderUnits::Degrees, false)
+                .expect("RBM not initialized"),
         }
     }
 
